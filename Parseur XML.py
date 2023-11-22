@@ -1,13 +1,12 @@
 from os.path import getsize
 
-
 class XmlBalise:
     def __init__(self,name,content,attrs,childs):
         self.name = name
         self.content = content
         for k,v in attrs.items():
-            setattr(self,k,v)
-        
+            setattr(self,k.replace("-","_"),v) #converts - in _ , for technical reasons
+        self.childs = childs
         child_names = [child.name for child in childs]
         doubles = []
         for child in childs:
@@ -16,6 +15,17 @@ class XmlBalise:
                 setattr(self,child.name+str(doubles.count(child.name)),child)
             else:
                 setattr(self,child.name,child)
+    def filter_childs(self,**kwargs):
+        result = []
+
+        for child in self.childs:
+            for attr,val in kwargs.items():
+                if getattr(child,attr).replace('"','') != val:
+                    break
+            else:
+                result.append(child)
+        return result
+        
     def __str__(self):
         return "balise"+" "+self.name
 
@@ -126,8 +136,6 @@ def parse(xml):
             i += len(txt)
     return XmlBalise(name,content,attrs,childs)
 
-xml = XmlDoc("my_xml.xml")
-print(xml.html)
+xml = XmlDoc("test xml.xml")
+print(xml.users.filter_childs(data_id = "106")[0].metier.content)
 print(xml.byte_size)
-
-
