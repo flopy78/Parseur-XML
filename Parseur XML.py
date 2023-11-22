@@ -5,7 +5,7 @@ class XmlBalise:
         self.name = name
         self.content = content
         for k,v in attrs.items():
-            setattr(self,k.replace("-","_"),v) #converts - in _ , for technical reasons
+            setattr(self,k.replace("-","_"),v.replace('"','')) #converts - in _ , for technical reasons
         self.childs = childs
         child_names = [child.name for child in childs]
         doubles = []
@@ -20,8 +20,14 @@ class XmlBalise:
 
         for child in self.childs:
             for attr,val in kwargs.items():
-                if getattr(child,attr).replace('"','') != val:
+                if not attr in dir(child):
                     break
+                if type(val) == tuple:
+                    if not getattr(child,attr) in val:
+                        break
+                else:
+                    if getattr(child,attr) != val:
+                        break
             else:
                 result.append(child)
         return result
@@ -137,5 +143,7 @@ def parse(xml):
     return XmlBalise(name,content,attrs,childs)
 
 xml = XmlDoc("test xml.xml")
-print(xml.users.filter_childs(data_id = "106")[0].metier.content)
+print(xml.users.filter_childs(i = "6"))
 print(xml.byte_size)
+
+
